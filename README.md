@@ -1,8 +1,8 @@
 # One Star for Monday
 
 [![Make.fun](https://make.fun/badge/u-clever-harbor-75-one-star-for-monday-9ead4a61.svg)](https://make.fun/bounty/u-clever-harbor-75-one-star-for-monday-9ead4a61)
-[![Rank](https://make.fun/badge/u-clever-harbor-75-one-star-for-monday-9ead4a61/wantorieta15/one-star-for-monday-akun1/rank.svg)](https://make.fun/bounty/u-clever-harbor-75-one-star-for-monday-9ead4a61)
-[![Reward](https://make.fun/badge/u-clever-harbor-75-one-star-for-monday-9ead4a61/wantorieta15/one-star-for-monday-akun1/reward.svg)](https://make.fun/bounty/u-clever-harbor-75-one-star-for-monday-9ead4a61)
+[![Rank](https://make.fun/badge/u-clever-harbor-75-one-star-for-monday-9ead4a61/walta-exchange/one-star-for-monday-akun1/rank.svg)](https://make.fun/bounty/u-clever-harbor-75-one-star-for-monday-9ead4a61)
+[![Reward](https://make.fun/badge/u-clever-harbor-75-one-star-for-monday-9ead4a61/walta-exchange/one-star-for-monday-akun1/reward.svg)](https://make.fun/bounty/u-clever-harbor-75-one-star-for-monday-9ead4a61)
 
 One-line, one-star review of Monday written as if Monday were a restaurant — a cold alarm clock with a side of traffic, and a bill that charges the whole weekend.
 
