@@ -1,17 +1,22 @@
 # SPDX-License-Identifier: MIT
-"""One Star for Monday — Make Fun bounty entry (Akun 1).
+"""One Star for Monday -- Make Fun bounty entry, account 1.
 
-Writes a single one-line, plain-text one-star review of Monday
-written as if Monday were a restaurant, to <out_dir>/entry.txt.
+The program writes one single-line, plain-text, one-star review
+of Monday, written as if Monday were a restaurant, into
+``<out_dir>/entry.txt``.
 
-Bounty rules enforced by validate_entry() before any write:
-  * exactly one line (no newline / carriage-return characters,
-    no leading or trailing whitespace, no trailing newline)
-  * at most 25 words
-  * at most 180 characters
-  * byte-identical to the frozen entry (sha256 + byte count)
+Every rule of the bounty is checked by ``validate_entry()`` before
+anything is written to disk:
 
-Pure Python standard library only. No network, no dependencies.
+* the entry is exactly one line: no ``\\n``, no ``\\r``, no leading
+  or trailing whitespace, and no trailing newline in the file;
+* at most 25 words;
+* at most 180 characters;
+* byte-identical to the frozen entry text (checked with sha256
+  and with the exact byte length).
+
+Only the Python standard library is used. There is no network
+access and there are no third-party dependencies.
 """
 
 import hashlib
@@ -20,9 +25,10 @@ import os
 MAX_WORDS = 25
 MAX_CHARS = 180
 
-# Frozen entry text. Byte-identical output is required:
-# sha256 4fc1bf3d9a6b22f8cd2d9942741511167dd6e6343b30664fe13cf9a692368ee0
-# (130 bytes, 1 line, no trailing newline).
+# The frozen entry text. The output file has to match it byte for
+# byte, so the digest and the length below are pinned here:
+#   sha256 4fc1bf3d9a6b22f8cd2d9942741511167dd6e6343b30664fe13cf9a692368ee0
+#   130 bytes, one line, no trailing newline.
 EXPECTED_SHA256 = (
     "4fc1bf3d9a6b22f8cd2d9942741511167dd6e6343b30664fe13cf9a692368ee0"
 )
@@ -30,71 +36,104 @@ EXPECTED_BYTES = 130
 
 
 def build_entry() -> str:
-    """Assemble the entry from its fixed sentence parts.
+    """Put the frozen one-line entry together from its three beats.
 
-    Opening (verdict) + scene (one concrete restaurant moment)
-    + twist (the bill). Joined with single spaces so the result
-    is exactly the frozen one-line entry.
+    The three beats are the verdict, one concrete restaurant scene,
+    and the twist about the bill. They are joined with exactly one
+    space between them, which reproduces the frozen entry text
+    character for character.
     """
-    opening = "One star."
+    verdict = "One star."
     scene = (
         "The waiter served Monday's special, a cold alarm clock "
         "with a side of traffic,"
     )
     twist = "then charged me the whole weekend for it."
-    return " ".join((opening, scene, twist))
+    return " ".join([verdict, scene, twist])
 
 
 def count_words(entry: str) -> int:
-    """Word count = whitespace-separated tokens."""
+    """Count words as whitespace-separated tokens."""
     return len(entry.split())
 
 
+def entry_sha256(entry: str) -> str:
+    """Return the hex sha256 digest of the entry in UTF-8."""
+    return hashlib.sha256(entry.encode("utf-8")).hexdigest()
+
+
+def entry_byte_length(entry: str) -> int:
+    """Return the length of the entry in UTF-8 bytes."""
+    return len(entry.encode("utf-8"))
+
+
 def validate_entry(entry: str) -> None:
-    """Raise ValueError unless the entry obeys every bounty rule."""
-    if not entry:
+    """Check the entry against every bounty rule.
+
+    Raises ``ValueError`` with a plain message as soon as any rule
+    fails, so a bad entry can never reach the output file.
+    """
+    if entry == "":
         raise ValueError("entry is empty")
-    if "\n" in entry or "\r" in entry:
-        raise ValueError("entry must be exactly one line")
-    if entry != entry.strip():
-        raise ValueError("entry must not have leading/trailing whitespace")
+    if "\n" in entry:
+        raise ValueError("entry must be exactly one line (no newline)")
+    if "\r" in entry:
+        raise ValueError("entry must be exactly one line (no carriage return)")
+    if entry.strip() != entry:
+        raise ValueError("entry must not have leading or trailing whitespace")
+
     words = count_words(entry)
     if words > MAX_WORDS:
-        raise ValueError(f"entry has {words} words, max is {MAX_WORDS}")
-    if len(entry) > MAX_CHARS:
         raise ValueError(
-            f"entry has {len(entry)} characters, max is {MAX_CHARS}"
+            "entry has %d words, but the maximum is %d" % (words, MAX_WORDS)
         )
-    digest = hashlib.sha256(entry.encode("utf-8")).hexdigest()
-    if digest != EXPECTED_SHA256:
-        raise ValueError(f"entry sha256 mismatch: {digest}")
-    if len(entry.encode("utf-8")) != EXPECTED_BYTES:
+
+    chars = len(entry)
+    if chars > MAX_CHARS:
         raise ValueError(
-            f"entry must be {EXPECTED_BYTES} bytes, got "
-            f"{len(entry.encode('utf-8'))}"
+            "entry has %d characters, but the maximum is %d"
+            % (chars, MAX_CHARS)
+        )
+
+    digest = entry_sha256(entry)
+    if digest != EXPECTED_SHA256:
+        raise ValueError("entry sha256 mismatch: got %s" % digest)
+
+    size = entry_byte_length(entry)
+    if size != EXPECTED_BYTES:
+        raise ValueError(
+            "entry must be %d bytes, got %d" % (EXPECTED_BYTES, size)
         )
 
 
 def resolve_out_dir() -> str:
-    """Output dir from the environment, defaulting to /output."""
-    return os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
+    """Read the output directory from the environment.
+
+    ``MAKEFUN_OUTPUT_DIR`` wins when it is set; otherwise the
+    default output directory ``/output`` is used.
+    """
+    return os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output"
 
 
 def write_entry(out_dir: str, entry: str) -> str:
-    """Write entry.txt directly (no tempfile / os.replace).
+    """Write the entry straight into ``entry.txt``.
 
-    The grader runs as a different uid and must be able to read
-    entry.txt, so the mode is set to 0644 explicitly.
+    The file is written directly with ``open()`` and its mode is
+    then set to 0644 with an explicit ``os.chmod()`` call. No
+    temporary file and no atomic rename are used here, because the
+    grader runs under a different uid and still has to be able to
+    read the file. Returns the full path of the written file.
     """
     os.makedirs(out_dir, exist_ok=True)
     path = os.path.join(out_dir, "entry.txt")
-    with open(path, "w", encoding="utf-8", newline="\n") as fh:
-        fh.write(entry)
+    with open(path, "w", encoding="utf-8", newline="\n") as handle:
+        handle.write(entry)
     os.chmod(path, 0o644)
     return path
 
 
 def main() -> None:
+    """Build the entry, validate it, then write it out."""
     entry = build_entry()
     validate_entry(entry)
     write_entry(resolve_out_dir(), entry)

@@ -4,10 +4,10 @@
 [![Rank](https://make.fun/badge/u-clever-harbor-75-one-star-for-monday-9ead4a61/walta-exchange/one-star-for-monday-akun1/rank.svg)](https://make.fun/bounty/u-clever-harbor-75-one-star-for-monday-9ead4a61)
 [![Reward](https://make.fun/badge/u-clever-harbor-75-one-star-for-monday-9ead4a61/walta-exchange/one-star-for-monday-akun1/reward.svg)](https://make.fun/bounty/u-clever-harbor-75-one-star-for-monday-9ead4a61)
 
-One-line, one-star review of Monday written as if Monday were a restaurant — a cold alarm clock with a side of traffic, and a bill that charges the whole weekend.
+A one-line, one-star review of Monday written as if Monday were a restaurant: the waiter serves a cold alarm clock with a side of traffic, then charges the whole weekend for it.
 
-Entry (130 characters, 24 words, single line):
+The entry (130 characters, 24 words, a single line, no trailing newline):
 
 > One star. The waiter served Monday's special, a cold alarm clock with a side of traffic, then charged me the whole weekend for it.
 
-`main.py` (pure Python standard library) writes that single line to `<out_dir>/entry.txt`.
+`main.py` uses only the Python standard library. It builds the entry with `build_entry()`, checks every bounty rule with `validate_entry()` (one line, at most 25 words, at most 180 characters, pinned sha256 and byte length), and writes it with `write_entry()` directly to `<out_dir>/entry.txt` with mode 0644.
